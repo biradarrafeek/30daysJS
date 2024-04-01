@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        select,
+        input[type=number],
+        input[type=submit] {
+            margin-bottom: 10px;
+            width: calc(100% - 16px);
+            padding: 12px;
+            border: 1px solid #cfc7c7;
+            box-sizing: border-box;
+            border-radius: 4px;
+        }
+
+        input[type="submit"] {
+            background-color: #4caf5d;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #67b975;
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .total {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Expense Tracker</h2>
+        <form action="" id="expenseForm">
+            <input type="text" id="description" placeholder="Expense Description" required>
+            <br>
+            <select id="category" required>
+                <option value="">Select Category</option>
+                <option value="Food">Food</option>
+                <option value="Transportation">Transportation</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Others">Others</option>
+            </select>
+            <br>
+            <input type="number" id="amount" placeholder="Amount" required>
+            <br>
+            <input type="submit" value="Add Expense">
+            <br>
+        </form>
+
+        <h3>Expense Summary</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="expenseList">
+            </tbody>
+        </table>
+
+        <div class="total" id="totalExpense">
+            Total Expense: $0
+        </div>
+    </div>
+
+    <script>
+        const expenseForm = document.getElementById("expenseForm");
+        const expenseList = document.getElementById("expenseList");
+        const totalExpense = document.getElementById("totalExpense");
+        let expenses = [];
+
+        // Load expenses from local storage if available
+        if (localStorage.getItem("expenses")) {
+            expenses = JSON.parse(localStorage.getItem("expenses"));
+            renderExpenses();
+        }
+
+        expenseForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const description = document.getElementById("description").value;
+            const category = document.getElementById("category").value;
+            const amount = parseFloat(document.getElementById("amount").value);
+
+            if (description && category && !isNaN(amount)) {
+                expenses.push({ description, category, amount });
+                saveExpenses();
+                renderExpenses();
+                updateTotalExpense();
+                document.getElementById("description").value = "";
+                document.getElementById("category").value = "";
+                document.getElementById("amount").value = "";
+            } else {
+                alert("Please fill out all fields correctly.");
+            }
+        })
+
+        function renderExpenses() {
+            expenseList.innerHTML = "";
+            expenses.forEach((expense, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${expense.description}</td>
+                    <td>${expense.category}</td>
+                    <td>$${expense.amount.toFixed(2)}</td>
+                    <td><button onclick="deleteExpense(${index})">Delete</button></td>
+                `;
+                expenseList.appendChild(row);
+            });
+        }
+
+        function updateTotalExpense() {
+            const total = expenses.reduce((acc, curr) => acc + curr.amount, 0);
+            totalExpense.textContent = `Total Expense: $${total.toFixed(2)}`;
+        }
+
+        function deleteExpense(index) {
+            expenses.splice(index, 1);
+            saveExpenses();
+            renderExpenses();
+            updateTotalExpense();
+        }
+
+        function saveExpenses() {
+            localStorage.setItem("expenses", JSON.stringify(expenses));
+        }
+    </script>
+</body>
+
+</html>
